@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
@@ -45,6 +45,29 @@ class Route(models.Model):
     def full_route(self) -> str:
         return f"{self.source} -> {self.destination}"
 
+    @staticmethod
+    def validate_source_not_equals_destination(
+        source: Airport,
+        destination: Airport,
+        error_to_raise: type[Exception]
+    ) -> None:
+        if source == destination:
+            raise error_to_raise({
+                "destination": "Destination can't be source"
+            })
+
+    def clean(self) -> None:
+        super().clean()
+        Route.validate_source_not_equals_destination(
+            source=self.source,
+            destination=self.destination,
+            error_to_raise=ValidationError
+        )
+
+    def save(self, *args, **kwargs) -> None:
+        self.full_clean()
+        super().save(*args, **kwargs)
+
     def __str__(self) -> str:
         return self.full_route
 
@@ -90,8 +113,18 @@ class Airplane(models.Model):
 
 class Crew(models.Model):
     """Model representing a crew member."""
+    class Position(models.TextChoices):
+        PILOT = ("pilot", "Pilot")
+        ATTENDANT = ("attendant", "Flight Attendant")
+        ENGINEER = ("engineer", "Engineer")
+
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
+    position = models.CharField(
+        max_length=20,
+        choices=Position.choices,
+        default=Position.ATTENDANT
+    )
 
     class Meta:
         ordering = ["last_name", "first_name"]
@@ -128,16 +161,44 @@ class Flight(models.Model):
         ordering = ["departure_time", "arrival_time"]
 
     @property
-    def duration(self) -> timedelta:
-        return self.arrival_time - self.departure_time
+    def duration(self) -> str:
+        total_seconds = int(
+            (self.arrival_time - self.departure_time)
+            .total_seconds()
+        )
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        hours_str = (
+            f"{hours} hour"
+            if hours == 1
+            else f"{hours} hours"
+        )
+        minutes_str = (
+            f"{minutes} minute"
+            if minutes == 1
+            else f"{minutes} minutes"
+        )
+        return f"{hours_str} {minutes_str}"
 
-    def clean(self) -> None:
-        super().clean()
-        if self.arrival_time + timedelta(minutes=30) <= self.departure_time:
-            raise ValidationError({
+    @staticmethod
+    def validate_min_arrival_time(
+            arrival_time: datetime,
+            departure_time: datetime,
+            error_to_raise: type[Exception]
+    ) -> None:
+        if arrival_time <= departure_time + timedelta(minutes=30):
+            raise error_to_raise({
                 "arrival_time":
                     "Arrival time must be at least 30 minutes from departure time."
             })
+
+    def clean(self) -> None:
+        super().clean()
+        Flight.validate_min_arrival_time(
+            arrival_time=self.arrival_time,
+            departure_time=self.departure_time,
+            error_to_raise=ValidationError
+        )
 
     def save(self, *args, **kwargs) -> None:
         self.full_clean()
@@ -191,15 +252,31 @@ class Ticket(models.Model):
         ordering = ["flight__departure_time"]
         unique_together = ("flight", "row", "seat_in_row")
 
+    @staticmethod
+    def validate_row_and_seat_within_capacity(
+            row: int,
+            airplane_rows: int,
+            seat_in_row: int,
+            airplane_seats_in_row: int,
+            error_to_raise: type[Exception]
+    ) -> None:
+        errors = {}
+        if row > airplane_rows:
+            errors["row"] = f"Row must be in range 1 to {airplane_rows}"
+        if seat_in_row > airplane_seats_in_row:
+            errors["seat_in_row"] = f"Seat must be in range 1 to {airplane_seats_in_row}"
+        if errors:
+            raise error_to_raise(errors)
+
     def clean(self) -> None:
         super().clean()
-        errors = {}
-        if self.row > self.flight.airplane.rows:
-            errors["row"] = "Invalid row number for this airplane"
-        if self.seat_in_row > self.flight.airplane.seats_in_row:
-            errors["seat_in_row"] = "Invalid seat number for this airplane"
-        if errors:
-            raise ValidationError(errors)
+        Ticket.validate_row_and_seat_within_capacity(
+            row=self.row,
+            airplane_rows=self.flight.airplane.rows,
+            seat_in_row=self.seat_in_row,
+            airplane_seats_in_row=self.flight.airplane.seats_in_row,
+            error_to_raise=ValidationError
+        )
 
     def save(self, *args, **kwargs) -> None:
         self.full_clean()
