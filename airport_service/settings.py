@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "debug_toolbar",
+    "rest_framework",
     "airport",
     "user"
 ]
@@ -49,6 +51,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -133,3 +136,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # User Model
 AUTH_USER_MODEL = "user.User"
+
+# IPS for DDT
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+]
