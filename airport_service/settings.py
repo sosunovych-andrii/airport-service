@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -149,7 +150,16 @@ MEDIA_URL = "/media/"
 
 # REST settings
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 5,
-    "MAX_PAGE_SIZE": 50
+    "MAX_PAGE_SIZE": 50,
+}
+
+# JWT settings
+SIMPLE_JWT = {
+   "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+   "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
