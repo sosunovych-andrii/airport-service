@@ -7,6 +7,7 @@ from airport.parsers import (
     parse_int_list,
     parse_date
 )
+from airport.permissions import IsAdminOrIfAuthenticatedReadOnly
 from airport.serializers.flight import (
     FlightSerializer,
     FlightListSerializer,
@@ -15,6 +16,8 @@ from airport.serializers.flight import (
 
 
 class FlightViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrIfAuthenticatedReadOnly]
+
     def get_queryset(self) -> QuerySet:
         queryset = Flight.objects.all()
         if self.action in ("list", "retrieve"):

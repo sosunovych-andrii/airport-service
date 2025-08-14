@@ -1,5 +1,6 @@
 from django.db.models import QuerySet, Prefetch
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 
 from airport.models import Order, Ticket
 from airport.parsers import parse_int, parse_date
@@ -12,6 +13,8 @@ from airport.serializers.order import (
 
 
 class OrderViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+
     def get_queryset(self) -> QuerySet:
         queryset = Order.objects.filter(user=self.request.user)
         if self.action in ("list", "retrieve"):
