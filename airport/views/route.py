@@ -2,6 +2,7 @@ from django.db.models import QuerySet
 from rest_framework import viewsets
 
 from airport.models import Route
+from airport.permissions import IsAdminOrIfAuthenticatedReadOnly
 from airport.serializers.route import (
     RouteSerializer,
     RouteListSerializer,
@@ -10,6 +11,8 @@ from airport.serializers.route import (
 
 
 class RouteViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrIfAuthenticatedReadOnly]
+
     def get_queryset(self) -> QuerySet:
         queryset = Route.objects.all()
         if self.action in ("retrieve", "list"):

@@ -2,6 +2,7 @@ from django.db.models import QuerySet
 from rest_framework import viewsets
 
 from airport.models import AirplaneType, Airplane
+from airport.permissions import IsAdminOrIfAuthenticatedReadOnly
 from airport.serializers.airplane import (
     AirplaneTypeSerializer,
     AirplaneSerializer,
@@ -11,11 +12,14 @@ from airport.serializers.airplane import (
 
 
 class AirplaneTypeViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
     queryset = AirplaneType.objects.all()
     serializer_class = AirplaneTypeSerializer
 
 
 class AirplaneViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrIfAuthenticatedReadOnly]
+
     def get_queryset(self) -> QuerySet:
         queryset = Airplane.objects.all()
         if self.action in ("retrieve", "list"):

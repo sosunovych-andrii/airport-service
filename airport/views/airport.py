@@ -2,10 +2,12 @@ from django.db.models import QuerySet
 from rest_framework import viewsets
 
 from airport.models import Airport
+from airport.permissions import IsAdminOrIfAuthenticatedReadOnly
 from airport.serializers.airport import AirportSerializer
 
 
 class AirportViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrIfAuthenticatedReadOnly]
     serializer_class = AirportSerializer
 
     def get_queryset(self) -> QuerySet:
