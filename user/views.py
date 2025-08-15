@@ -9,11 +9,19 @@ User = get_user_model()
 
 
 class CreateUserView(generics.CreateAPIView):
+    """
+    Create a new user account.
+    Accessible without authentication.
+    """
     permission_classes = [AllowAny]
     serializer_class = UserSerializer
 
 
 class ManageUserView(generics.RetrieveUpdateAPIView):
+    """
+    Retrieve or update the authenticated user's profile.
+    Only accessible to authenticated users.
+    """
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
 

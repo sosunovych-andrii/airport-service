@@ -1,4 +1,8 @@
+from datetime import datetime
+
 from django.db.models import QuerySet, Prefetch
+from django.http import HttpRequest, HttpResponse
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
@@ -13,6 +17,11 @@ from airport.serializers.order import (
 
 
 class OrderViewSet(viewsets.ModelViewSet):
+    """
+    Manage orders in the system.
+    Supports listing, retrieving, creating, updating, and deleting.
+    Authenticated users can only access their own orders.
+    """
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self) -> QuerySet:
@@ -59,3 +68,22 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer: OrderSerializer) -> None:
         serializer.save(user=self.request.user)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="flight",
+                type=int,
+                description="Filter by flight_id (e.g., ?flight_id=1)",
+                required=False
+            ),
+            OpenApiParameter(
+                name="created_at",
+                type=datetime,
+                description="Filter by created_time (e.g., ?created_at=2025-08-2024)",
+                required=False
+            )
+        ]
+    )
+    def list(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        return super().list(request, *args, **kwargs)
