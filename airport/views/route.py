@@ -1,4 +1,6 @@
 from django.db.models import QuerySet
+from django.http import HttpRequest, HttpResponse
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets
 
 from airport.models import Route
@@ -11,6 +13,11 @@ from airport.serializers.route import (
 
 
 class RouteViewSet(viewsets.ModelViewSet):
+    """
+    Manage routes in the system.
+    Supports listing, retrieving, creating, updating, and deleting.
+    Read-only for authenticated users; full access for admins.
+    """
     permission_classes = [IsAdminOrIfAuthenticatedReadOnly]
 
     def get_queryset(self) -> QuerySet:
@@ -34,3 +41,22 @@ class RouteViewSet(viewsets.ModelViewSet):
         elif self.action == "retrieve":
             serializer = RouteRetrieveSerializer
         return serializer
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="source",
+                type=str,
+                description="Filter by source_name (e.g., ?source_name=Boryspil)",
+                required=False
+            ),
+            OpenApiParameter(
+                name="destination",
+                type=str,
+                description="Filter by destination_name (e.g., ?destination_name=Manchester)",
+                required=False
+            )
+        ]
+    )
+    def list(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        return super().list(request, *args, **kwargs)
