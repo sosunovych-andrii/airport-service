@@ -3,7 +3,7 @@ from datetime import datetime
 from django.db.models import QuerySet, Prefetch
 from django.http import HttpRequest, HttpResponse
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticated
 
 from airport.models import Order, Ticket
@@ -16,10 +16,16 @@ from airport.serializers.order import (
 )
 
 
-class OrderViewSet(viewsets.ModelViewSet):
+class OrderViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     """
     Manage orders in the system.
-    Supports listing, retrieving, creating, updating, and deleting.
+    Supports listing, retrieving, creating and deleting.
     Authenticated users can only access their own orders.
     """
     permission_classes = [IsAuthenticated]
