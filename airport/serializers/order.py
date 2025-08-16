@@ -32,7 +32,7 @@ class OrderCreateSerializer(OrderSerializer):
 
     @transaction.atomic()
     def create(self, validated_data: dict) -> Order:
-        tickets_data = validated_data.pop("tickets")
+        tickets_data = validated_data.pop("tickets", None)
         order = Order.objects.create(**validated_data)
         for ticket_data in tickets_data:
             Ticket.objects.create(order=order, **ticket_data)
