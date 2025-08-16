@@ -24,7 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def update(self, instance: User, validated_data: dict) -> User:
         """Update a user, set the password correctly and return it"""
-        password = validated_data.pop("password")
+        password = validated_data.pop("password", None)
         user = super().update(instance, validated_data)
         if password:
             user.set_password(password)
