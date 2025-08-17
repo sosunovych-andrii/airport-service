@@ -117,9 +117,7 @@ class OrderViewSetTest(TestCase):
     def test_create_order_authenticated(self):
         self.client.force_authenticate(user=self.user)
         data = {"tickets": [{"flight": self.flight.pk, "row": 3, "seat_in_row": 3}]}
-        response = self.client.post(self.list_url, data)
-        if response.status_code != status.HTTP_201_CREATED:
-            print("Create order error:", response.data)
+        response = self.client.post(self.list_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Order.objects.count(), 3)
         self.assertEqual(Ticket.objects.count(), 3)
@@ -131,9 +129,7 @@ class OrderViewSetTest(TestCase):
     def test_create_order_invalid_ticket(self):
         self.client.force_authenticate(user=self.user)
         data = {"tickets": [{"flight": 999, "row": 3, "seat_in_row": 3}]}
-        response = self.client.post(self.list_url, data)
-        if response.status_code != status.HTTP_400_BAD_REQUEST:
-            print("Invalid ticket error:", response.data)
+        response = self.client.post(self.list_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Order.objects.count(), 2)
         self.assertEqual(Ticket.objects.count(), 2)
