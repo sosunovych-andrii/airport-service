@@ -13,18 +13,9 @@ jobs:
   lint_and_test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: test_db
-          POSTGRES_USER: ${{ secrets.DB_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        options:
-          --health-cmd="pg_isready -U ${{ secrets.DB_USER }} -d test_db"
+
     env:
-      DATABASE_URL: postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@postgres:5432/test_db
-      DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
+      DJANGO_SETTINGS_MODULE: airport_service.settings_test
 
     steps:
       - name: Checkout repo
