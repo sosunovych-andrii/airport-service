@@ -61,7 +61,6 @@ class OrderViewSet(
 
         return queryset.distinct()
 
-
     def get_serializer_class(self) -> type[OrderSerializer]:
         serializer = OrderSerializer
         if self.action == "retrieve":

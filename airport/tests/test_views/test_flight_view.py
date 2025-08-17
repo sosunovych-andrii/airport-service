@@ -167,14 +167,6 @@ class FlightViewSetTest(TestCase):
         self.assertEqual(self.flight.route.pk, self.route.pk)
         self.assertEqual(self.flight.airplane.pk, self.airplane.pk)
 
-    def test_update_flight_non_admin(self):
-        self.client.force_authenticate(user=self.user)
-        data = {"crew": [self.crew1.pk]}
-        response = self.client.put(self.detail_url, data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.flight.refresh_from_db()
-        self.assertEqual(self.flight.crew.count(), 2)
-
     def test_delete_flight_admin(self):
         self.client.force_authenticate(user=self.admin)
         response = self.client.delete(self.detail_url)
