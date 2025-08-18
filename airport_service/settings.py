@@ -27,12 +27,15 @@ DJANGO_SETTINGS_MODULE = os.getenv("DJANGO_SETTINGS_MODULE", "airport_service.se
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-*rax%4lsfwluh35=m14hd*502-4*$k3970@b0%8^5mlj@e212@"
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    "django-insecure-*rax%4lsfwluh35=m14hd*502-4*$k3970@b0%8^5mlj@e212@"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost",]
 
 
 # Application definition
