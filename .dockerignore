@@ -1,0 +1,9 @@
+.idea/
+.github
+.venv
+__pycache__/
+media
+.env.sample
+.flake8
+.gitignore
+README.md

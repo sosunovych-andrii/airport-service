@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -19,17 +20,22 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Path to settings module
+DJANGO_SETTINGS_MODULE = os.getenv("DJANGO_SETTINGS_MODULE", "airport_service.settings")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-*rax%4lsfwluh35=m14hd*502-4*$k3970@b0%8^5mlj@e212@"
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    "django-insecure-*rax%4lsfwluh35=m14hd*502-4*$k3970@b0%8^5mlj@e212@"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost",]
 
 
 # Application definition
@@ -41,6 +47,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "debug_toolbar",
+    "rest_framework",
+    "drf_spectacular",
     "airport",
     "user"
 ]
@@ -49,6 +58,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -130,3 +140,55 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# User Model
+AUTH_USER_MODEL = "user.User"
+
+# IPS for DDT
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+]
+
+# Media
+MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "/media/"
+
+# REST settings
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle"
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "100/day",
+        "user": "1000/day"
+    },
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 5,
+    "MAX_PAGE_SIZE": 50,
+}
+
+# Settings to improve Swagger documentation display
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Airport Service API",
+    "DESCRIPTION": "Order tickets for flights",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "defaultModelRendering": "model",
+        "defaultModelsExpandDepth": 2,
+        "defaultModelExpandDepth": 2,
+    }
+}
+
+# JWT settings
+SIMPLE_JWT = {
+   "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+   "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+}
