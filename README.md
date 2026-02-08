@@ -37,7 +37,7 @@ You can check with:
 
 1. **Clone the repository:**
 ```shell
-   git clone https://github.com/sosunovych-andrii/task-manager.git
+   git clone https://github.com/sosunovych-andrii/airport-service.git
 ````
 2. **Create a .env file in the root directory of the project** and copy the content from .env.sample
 replacing the placeholder values with your own:
